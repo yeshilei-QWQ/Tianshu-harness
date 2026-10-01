@@ -400,6 +400,10 @@ export interface TuiMetrics {
   outputTokens: number
   /** API 最近一轮返回的真实 prompt_tokens（校准基准）；0 表示尚无数据 */
   lastRealPromptTokens: number
+  /** 本会话 CVM 拦截累计数（issue #247 补充项）。
+   *  undefined = 宿主无此能力（RIVET_CVM_VECTOR=off）→ GlanceBar 不占位；
+   *  0 是有效值——「没触发」必须与「没看见」可区分。 */
+  cvmInterceptions?: number
 }
 
 /** 指标提供者：返回 null 表示暂无（回退 TUI 内部估算）。 */
