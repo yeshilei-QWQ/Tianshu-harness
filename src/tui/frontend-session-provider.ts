@@ -52,6 +52,10 @@ export function createFrontendMetricsProvider(app: TuiApp, getContext: () => Boo
       cost: pricing ? computeUsageCost(total, pricing).total : 0, costSource: pricing ? 'estimate' : 'unknown',
       inputTokens: total.input_tokens, outputTokens: total.output_tokens, lastRealPromptTokens: session.getLastRealPromptTokens(),
       pricingPhase: providerName === 'deepseek' ? deepseekPricingPhase(Date.now()) : undefined,
+      // issue #247 第 4 条：本会话 CVM 拦截计数。mode==='off' 时给 undefined 而非 0
+      // ——能力关闭时显示「⛨ 0」会被读成「拦了 0 次」，而事实是「没在拦」。
+      // 计数挂 session，故跨 /model 切换存活。
+      cvmInterceptions: ctx.agent.cvmVector.mode === 'off' ? undefined : session.getCvmInterceptions().total,
     }
   }
 }

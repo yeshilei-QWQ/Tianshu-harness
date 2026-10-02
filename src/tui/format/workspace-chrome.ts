@@ -2,7 +2,7 @@ import { formatPermissionChrome } from '../../agent/approval-vocabulary.js'
 import { stripVTControlCharacters } from 'node:util'
 import { color } from '../engine/ansi.js'
 import { displayWidth, truncateToDisplayWidth, ambiguousWideEnabled } from '../width.js'
-import { shortenCwd } from './glance-bar.js'
+import { shortenCwd, formatCvmBadge } from './glance-bar.js'
 import type { RivetTheme } from '../theme.js'
 
 const policy = () => ({ ambiguousAsWide: ambiguousWideEnabled() })
@@ -51,6 +51,11 @@ export function formatWorkspaceIdentity(input: {
 /** One truthful mode row; detailed telemetry and task contents remain in their panels. */
 export function formatWorkspaceMode(input: {
   width: number; approvalMode: string; planMode?: boolean; askMode?: boolean; tasks?: number; steps?: number; stashed?: boolean; worker?: string; zenBadge?: string
+  /** issue #247 第 4 条：本会话 CVM 拦截计数。`undefined` = 宿主无此能力
+   *  （RIVET_CVM_VECTOR=off）→ 不占位；`0` 是有效值，仍渲染——「没触发」必须
+   *  与「没看见」可区分。本轮 main 改版后，这一行取代了 GlanceBar 成为 TUI 的
+   *  常驻指标位，故计数从 `formatGlanceRight` 一并接过来。 */
+  cvmInterceptions?: number
 }, theme: RivetTheme): string {
   const mode = input.approvalMode
   const tint = mode === 'manual' ? theme.warning : mode === 'dangerously-skip-permissions' ? theme.error
@@ -58,6 +63,9 @@ export function formatWorkspaceMode(input: {
   const permission = color(`权限：${formatPermissionChrome(mode)}`, tint)
   const activity = input.askMode ? '问答' : input.planMode ? '计划' : '对话'
   const parts = [permission, color(activity, input.planMode ? theme.primary : theme.muted)]
+  // CVM 计数排在任务/步骤之前：本函数末尾的 while 是**从尾部**裁剪的，
+  // 排在前面才能保证它比「任务 N · /tasks」那类更晚被丢掉（常驻语义）。
+  if (input.cvmInterceptions !== undefined) parts.push(formatCvmBadge(input.cvmInterceptions, theme))
   if (input.tasks) parts.push(color(`任务 ${input.tasks} · /tasks`, theme.muted))
   if (input.steps) parts.push(color(`步骤 ${input.steps} · Ctrl+X T`, theme.muted))
   if (input.stashed) parts.push(color('草稿已暂存', theme.muted))

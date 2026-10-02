@@ -6548,11 +6548,13 @@ export class TuiApp {
     let glanceCost: number
     let glanceEstimatedTokens: number | undefined
     let glanceMaxTokens: number | undefined
+    let glanceCvmInterceptions: number | undefined
     if (metrics) {
       glanceCacheHitRate = metrics.cacheHitRate ?? undefined
       glanceCost = metrics.cost
       glanceEstimatedTokens = metrics.estimatedTokens
       glanceMaxTokens = metrics.maxTokens
+      glanceCvmInterceptions = metrics.cvmInterceptions
     } else {
       glanceCacheHitRate = this.metricsGlanceController.lastCacheHitRate
       glanceCost = this.estimateSessionCost()
@@ -7018,6 +7020,8 @@ export class TuiApp {
         tasks: this.activityStore.project().filter(task => task.status === 'running' || task.status === 'pending').length
           + this.jobsModel.runningCount(), steps: todoSummary ? todoSummary.total - todoSummary.done : 0,
         zenBadge: this.zenBadgeProvider?.() ?? (Date.now() < this.zenUnlockNoticeUntil ? '禅已解除' : undefined),
+        // issue #247 第 4 条：本会话 CVM 拦截计数（main 改版后常驻位就是这一行）
+        cvmInterceptions: glanceCvmInterceptions,
       }, this.theme), region: 'mode' })
 
       // 5a3. @file 节点诊断（节点化 v1）：解析出的 @file:/@folder: 在 cwd 下

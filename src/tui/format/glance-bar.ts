@@ -118,7 +118,7 @@ function formatPricingPhaseBadge(phase: 'peak' | 'offpeak', compact: boolean, th
  *
  * 色阶：0 = muted（常态不抢眼）；>0 = secondary（护栏工作过的信号）。
  */
-function formatCvmBadge(count: number, theme: RivetTheme): string {
+export function formatCvmBadge(count: number, theme: RivetTheme): string {
   return color(`⛨ ${count}`, count > 0 ? theme.secondary : theme.muted)
 }
 
