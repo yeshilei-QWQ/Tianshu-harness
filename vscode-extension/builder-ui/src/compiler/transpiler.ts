@@ -213,10 +213,10 @@ function transpileReact(code: string): string {
   }
 
   // 轻量代码预处理：
-  // 1. 移除 import 语句
+  // 1. 移除 import 语句 (支持缩进)
   const cleanCode = code
-    .replace(/^import\s+.*?from\s+['"].*?['"];?/gm, '')
-    .replace(/^import\s+['"].*?['"];?/gm, '')
+    .replace(/^\s*import\s+.*?from\s+['"].*?['"];?/gm, '')
+    .replace(/^\s*import\s+['"].*?['"];?/gm, '')
     .replace(/export\s+default\s+/g, 'window.__DefaultComponent = ')
     .replace(/export\s+(const|function|class)\s+(\w+)/g, '$1 $2; window.$2 = $2;')
 

@@ -17,7 +17,7 @@ foreach ($sid in @($user.Value, 'S-1-5-18', 'S-1-5-32-544')) {
   $rule = New-Object Security.AccessControl.FileSystemAccessRule($id, 'FullControl', $inherit, 'None', 'Allow')
   $acl.AddAccessRule($rule)
 }
-$current = Get-Acl -LiteralPath $path
+$current = if ($item.PSIsContainer) { [IO.Directory]::GetAccessControl($item.FullName) } else { [IO.File]::GetAccessControl($item.FullName) }
 if (@($user.Value, 'S-1-5-18', 'S-1-5-32-544') -notcontains $current.GetOwner([Security.Principal.SecurityIdentifier]).Value) { throw 'Untrusted storage owner is unsafe' }
 if ($current.GetSecurityDescriptorSddlForm('Access') -ne $acl.GetSecurityDescriptorSddlForm('Access')) {
   if ($item.PSIsContainer) { [IO.Directory]::SetAccessControl($item.FullName, $acl) }
